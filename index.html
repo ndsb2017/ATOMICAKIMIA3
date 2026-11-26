@@ -65,6 +65,8 @@
         function lmsApp() {
             return {
                 init() {
+                    this.loginFieldsUnlocked = false;
+                    this.loginForm = { username: '', password: '' };
                     this.fetchSettingsOnly();
                 },
 
@@ -73,6 +75,7 @@
                 mobileMenuOpen: false,
                 isLoading: false,
                 loginLoading: false,
+                loginFieldsUnlocked: false,
                 showLogoutModal: false,
                 showUploadModal: false,
                 uploadForm: { kelas: '', fileName: '', fileData: null, isUploading: false },
@@ -857,7 +860,15 @@
                     }
                 },
 
-                logout() { this.isLoggedIn = false; this.activeTab = 'dashboard'; this.showLogoutModal = false; this.loginForm.password = ''; if (this.chatEventSource) this.chatEventSource.close(); },
+                logout() {
+                    this.isLoggedIn = false;
+                    this.activeTab = 'dashboard';
+                    this.showLogoutModal = false;
+                    this.loginFieldsUnlocked = false;
+                    this.loginForm = { username: '', password: '' };
+                    this.loginError = '';
+                    if (this.chatEventSource) this.chatEventSource.close();
+                },
                 getMenuLabel(id) { return this.menuItems.find(m => m.id === id)?.label || 'Menu'; },
                 getMyId() { return this.userId || (this.data.adminUsers.find(u => String(u.username) === String(this.loginForm.username)) || {}).id; },
 
@@ -989,14 +1000,14 @@
             <div x-show="loginError" class="mb-5 bg-[#fce8e8] text-[#c81e1e] p-3 rounded-lg text-[13px] flex items-center font-medium" style="display: none;">
                 <i class="ph-fill ph-x-circle text-lg mr-2 shrink-0"></i><span x-text="loginError"></span>
             </div>
-            <form @submit.prevent="login()" class="space-y-4">
+            <form @submit.prevent="login()" autocomplete="off" class="space-y-4">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Username / NIS</label>
-                    <input type="text" x-model="loginForm.username" required placeholder="Masukkan username / NIS" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] outline-none transition-colors">
+                    <input type="text" name="lms_user_field" autocomplete="off" :readonly="!loginFieldsUnlocked" @focus="loginFieldsUnlocked = true" @mousedown="loginFieldsUnlocked = true" @touchstart="loginFieldsUnlocked = true" x-model="loginForm.username" required placeholder="Masukkan username / NIS" class="w-full px-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] outline-none transition-colors">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Password</label>
-                    <input type="password" x-model="loginForm.password" required placeholder="Masukkan password" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] outline-none transition-colors">
+                    <input type="password" name="lms_pass_field" autocomplete="new-password" :readonly="!loginFieldsUnlocked" @focus="loginFieldsUnlocked = true" @mousedown="loginFieldsUnlocked = true" @touchstart="loginFieldsUnlocked = true" x-model="loginForm.password" required placeholder="Masukkan password" class="w-full px-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e3a8a]/20 focus:border-[#1e3a8a] outline-none transition-colors">
                 </div>
                 <button type="submit" :disabled="loginLoading" class="w-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white font-bold py-3.5 rounded-xl text-sm transition-colors flex justify-center items-center mt-4">
                     <i x-show="!loginLoading" class="ph-bold ph-sign-in mr-2 text-lg"></i>
